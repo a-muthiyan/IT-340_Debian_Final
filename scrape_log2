@@ -1,0 +1,72 @@
+#!/bin/bash
+log=$1
+num_days=$2
+temp='/home/amuthiyan/temp'
+day=$(date +%d)
+month=$(date +%b)
+month_num=$(date +%m)
+final_report='/home/amuthiyan/final_report'
+echo $log > $final_report
+cat $log | egrep '[A-Z][a-z]{2}[[:space:]][0-9]{2}'>$temp
+count=$(wc -l < $temp)
+if [[ $count -gt 0 ]]; then
+awk -v day="$day" -v num_days="$num_days" -v month="$month" '(month==$1) &&  (day-$2<=num_days) {print $0}' $log > /home/amuthiyan/tmptest 
+grep -i "error" /home/amuthiyan/tmptest > $temp
+num_errors=$(wc -l < $temp)
+grep -i "critical" /home/amuthiyan/tmptest > $temp
+num_crits=$(wc -l < $temp)
+grep -i "warning" /home/amuthiyan/tmptest > $temp
+num_warns=$(wc -l < $temp)
+grep -i "fatal" /home/amuthiyan/tmptest > $temp
+num_fats=$(wc -l < $temp)
+echo 'Number of errors: ' $num_errors
+echo 'Number of errors: ' $num_errors >> $final_report
+echo 'Number of critical messages: ' $num_crits
+echo 'Number of critical messages: ' $num_crits >> $final_report
+echo 'Number of warning: ' $num_warns
+echo 'Number of warnings: ' $num_warns >> $final_report
+echo 'Number of fatal messages: ' $num_fats
+echo 'Number of fatal messages: ' $num_fats >> $final_report
+elif [[ "$log"=="/var/log/dpkg.log" ]]
+then
+awk -F'-|[[:space:]]' -v month="$month" -v day="$day" -v num_days="$num_days" -v month="$month_num" '($2==month) (day-$3<=num_days) {print $0}' $log > /home/amuthiyan/tmptest
+grep -i "error" /home/amuthiyan/tmptest > $temp
+num_errors=$(wc -l < $temp)
+grep -i "critical" /home/amuthiyan/tmptest > $temp
+num_crits=$(wc -l < $temp)
+grep -i "warning" /home/amuthiyan/tmptest > $temp
+num_warns=$(wc -l < $temp)
+grep -i "fatal" /home/amuthiyan/tmptest > $temp
+num_fats=$(wc -l < $temp)
+echo 'Number of errors: ' $num_errors
+echo 'Number of errors: ' $num_errors >> $final_report
+echo 'Number of critical messages: ' $num_crits
+echo 'Number of critical messages: ' $num_crits >> $final_report
+echo 'Number of warning: ' $num_warns
+echo 'Number of warnings: ' $num_warns >> $final_report
+echo 'Number of fatal messages: ' $num_fats
+echo 'Number of fatal messages: ' $num_fats >> $final_report 
+elif [[ "$log"=="/var/log/alternatives.log" ]]
+then
+awk -F'-|[[:space:]]' -v day="$day" -v num_days="$num_days" -v month="$month_num" '($4==month) && (day-$5<=num_days) {print $0}' $log > /home/amuthiyan/tmptest
+grep -i "error" /home/amuthiyan/tmptest > $temp
+num_errors=$(wc -l > $temp)
+grep -i "critical" /home/amuthiyan/tmptest > $temp
+num_crits=$(wc -l < $temp)
+grep -i "warning" /home/amuthiyan/tmptest > $temp
+num_warns=$(wc -l < $temp)
+grep -i "fatal" /home/amuthiyan/tmptest > $temp
+num_fats=$(wc -l < $temp)
+echo 'Number of errors: ' $num_errors
+echo 'Number of errors: ' $num_errors >> $final_report
+echo 'Number of critical messages: ' $num_crits
+echo 'Number of critical messages: ' $num_crits >> $final_report
+echo 'Number of warning: ' $num_warns
+echo 'Number of warnings: ' $num_warns >> $final_report
+echo 'Number of fatal messages: ' $num_fats
+echo 'Number of fatal messages: ' $num_fats >> $final_report 
+else
+echo 'Dont recognize log file'
+fi
+rm -f /home/amuthiyan/tmptest
+rm -f $temp
